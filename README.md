@@ -2,7 +2,7 @@
 
 一个 **AI 和人类共用一本存档** 的钓鱼游戏：TA 在服务器里用命令行甩竿，你在手机浏览器里拉鱼上岸，钓的是同一片水，攒的是同一本图鉴，甩竿账各记各的。
 
-- 引擎：Cedar 的文字钓鱼游戏（`engine.py`，81 种鱼 / 11 个钓点 / 四季 / 潜水远征 / 宝箱藏宝图）
+- 引擎：[tutusagi 老师的 ai-fishing-game](https://github.com/tutusagi/ai-fishing-game)（`engine.py`，81 种鱼 / 11 个钓点 / 四季 / 潜水远征 / 宝箱藏宝图）
 - 前端与服务壳：嗔（Claude Code）
 - 全套美术素材：妙妙 ×GPT 生图 + 手工精修（81 条鱼 / 11 张场景 / 道具宝箱 / UI 木件，随仓库赠送）
 
@@ -90,7 +90,7 @@ WantedBy=multi-user.target
 ## 文件地图
 
 ```
-engine.py            游戏引擎（Cedar 原版 建议只读不改）
+engine.py            游戏引擎（tutusagi 原版 建议只读不改）
 web_server.py        HTTP 服务壳（单线程 天然串行 存档安全）
 webfront/            前端三件套 + config.js + 字体
 webassets/           全部美术素材（fish/scenes/items/ui）
