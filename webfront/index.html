@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Gone Fishing · 夫妻渔场</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="scene">
+    <!-- 顶部：地名木牌 + 点数 -->
+    <div id="hud-top">
+      <div class="loc-plate"><span id="loc-name">…</span></div>
+      <div class="top-right">
+        <div class="info-label"><img src="assets/ui/金币.png" alt=""><span id="pts">…</span></div>
+        <div class="info-label"><img src="assets/ui/图标_图鉴书.png" alt=""><span id="enc">…</span></div>
+        <div class="info-label"><img class="avatar" id="avatar-human" src="" alt=""><span id="casts-miao">0</span></div>
+        <div class="info-label"><img class="avatar" id="avatar-ai" src="" alt=""><span id="casts-chen">0</span></div>
+      </div>
+    </div>
+
+    <!-- 左侧功能钮 -->
+    <div id="side-left">
+      <button class="side-btn bare" data-panel="codex" type="button" aria-label="图鉴"><img class="deco" src="assets/ui/图标_图鉴书.png" alt=""><span>图鉴</span></button>
+      <button class="side-btn bare" data-panel="shop" type="button" aria-label="商店"><img class="deco" src="assets/ui/图标_商店.png" alt=""><span>商店</span></button>
+      <button class="side-btn bare" id="exit-island" type="button" aria-label="回小岛"><img class="deco" src="assets/ui/图标_小岛.png" alt=""><span>小岛</span></button>
+    </div>
+
+    <!-- 右侧状态悬浮 -->
+    <div id="side-right">
+      <div class="float-chip" id="oxy-chip" hidden><img src="assets/items/氧气瓶.png" alt=""><span id="oxy-n"></span></div>
+      <button class="float-chip chest-chip" id="chest-chip" type="button" hidden><img src="assets/items/锈迹宝箱_闭.png" alt=""><span id="chest-n"></span></button>
+      <button class="float-chip" id="dive-chip" type="button" hidden><img src="assets/ui/图标_潜水.png" alt=""><span>潜水</span></button>
+    </div>
+
+    <!-- 钓线 浮标 鱼影 涟漪 -->
+    <div id="fishline" hidden></div>
+    <img id="ripple" class="ripple" src="assets/items/涟漪圈.png" alt="">
+    <div id="fish-shadow" class="fish-shadow"><svg viewBox="0 0 60 24" width="100%" height="100%"><g fill="rgba(12,20,18,0.55)"><ellipse cx="26" cy="12" rx="16" ry="7"/><path class="tail" d="M40 12 L54 4 L50 12 L54 20 Z"/><circle cx="14" cy="10" r="1.3" fill="rgba(30,40,38,0.8)"/></g></svg></div>
+    <img id="bobber" class="bobber" src="assets/items/浮标浮着.png" alt="" style="visibility:hidden">
+    <img id="splash" class="splash" src="assets/items/水花.png" alt="">
+
+    <!-- 底部木甲板控制区 -->
+    <div id="deck">
+      <div class="deck-boards"></div>
+      <div id="bottom-controls">
+        <button class="round-btn side" id="bag-btn" type="button"><img class="deco" src="assets/ui/fishing-net.png" alt=""><span>渔篓</span></button>
+        <button class="round-btn big" id="cast-big" type="button"><img id="rod-img" src="assets/ui/鱼竿_收.png" alt=""><span id="cast-label">抛 竿</span></button>
+        <button class="round-btn side" id="map-btn" type="button"><img class="deco" src="assets/ui/treasure-map.png" alt=""><span>地图</span></button>
+      </div>
+      <button id="bait-cycle" type="button"></button>
+      <div id="ticker"><span id="ticker-text"></span></div>
+    </div>
+  </div>
+
+  <!-- 浮层面板（图鉴/渔篓/商店/地图） -->
+  <div id="panel" hidden>
+    <div class="panel-card">
+      <header><h2 id="panel-title"></h2><button id="panel-close" type="button" aria-label="关闭">×</button></header>
+      <div id="panel-body"></div>
+    </div>
+  </div>
+
+  <!-- 结果卡 modal -->
+  <div id="modal" class="modal" hidden>
+    <section class="modal-card" role="dialog" aria-modal="true">
+      <header><h2 id="modal-title"></h2><button id="modal-close" type="button" aria-label="关闭">×</button></header>
+      <div id="modal-body" class="modal-body"></div>
+    </section>
+  </div>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

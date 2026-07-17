@@ -1,0 +1,749 @@
+/* Gone Fishing 我们的鱼塘 · 全屏沉浸版 2026-07-16（她出的效果图 我照抄）*/
+@font-face {
+  font-family: 'PixelZ';
+  src: url('fonts/ZLabsBitmap.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'MoonKai';
+  src: url('fonts/MoonStarsKai-Regular.woff2') format('woff2');
+  font-display: swap;
+}
+:root {
+  --wood: #4a3626;
+  --wood-light: #6b4f36;
+  --cream-text: #e8dcc0;
+  --gold: #e8b34a;
+  --accent: #c0844a;
+  --down: #c96a5c;
+  --up: #7fb069;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body {
+  font-family: "PingFang SC", "Hiragino Sans GB", sans-serif;
+  background: #1a2620;
+  color: var(--cream-text);
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ---------- 全屏场景 ---------- */
+#scene {
+  position: fixed; inset: 0;
+  background-size: cover; background-position: center 30%;
+  overflow: hidden;
+}
+
+/* ---------- 顶部 ---------- */
+#hud-top {
+  position: absolute; top: env(safe-area-inset-top, 8px); left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 10px 10px 0;
+  z-index: 5;
+}
+.loc-plate {
+  background: url('assets/ui/木牌_地名.png') no-repeat center / 100% 100%;
+  min-width: 168px; padding: 16px 26px;
+  text-align: center;
+  font-family: 'PixelZ', sans-serif; font-size: 15px; font-weight: 700;
+  color: var(--cream-text); letter-spacing: 2px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+.top-right { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.coin-bar {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(30,22,14,0.72); border: 1.5px solid var(--wood-light);
+  border-radius: 999px; padding: 4px 12px 4px 6px;
+  font-family: 'PixelZ', monospace; font-size: 14px; color: var(--gold);
+}
+.coin-bar img { width: 22px; height: 22px; image-rendering: pixelated; }
+.enc-bar { padding: 4px 12px; color: var(--cream-text); font-size: 12px; }
+
+/* ---------- 左侧钮 ---------- */
+#side-left {
+  position: absolute; left: 8px; top: 26%;
+  display: flex; flex-direction: column; gap: 14px; z-index: 5;
+}
+.side-btn {
+  width: 58px; height: 58px; border: none; padding: 4px;
+  background: url('assets/ui/圆框_小.png') no-repeat center / contain;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--cream-text);
+}
+.side-btn img.deco { width: 26px; height: 26px; object-fit: contain; image-rendering: pixelated; }
+.side-btn svg { width: 22px; height: 22px; }
+.side-btn span { font-size: 10px; font-family: 'PixelZ', sans-serif; margin-top: -1px; text-shadow: 0 1px 2px rgba(0,0,0,0.7); }
+
+/* ---------- 右侧悬浮 ---------- */
+#side-right {
+  position: absolute; right: 8px; top: 26%;
+  display: flex; flex-direction: column; gap: 10px; align-items: flex-end; z-index: 5;
+}
+.float-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(30,22,14,0.72); border: 1.5px solid var(--wood-light);
+  border-radius: 12px; padding: 6px 10px;
+  font-family: 'PixelZ', sans-serif; font-size: 12px; color: var(--cream-text);
+  cursor: pointer;
+}
+.float-chip img { width: 26px; height: 26px; object-fit: contain; image-rendering: pixelated; }
+.chest-chip { animation: chestglow 1.6s ease-in-out infinite; }
+@keyframes chestglow { 0%,100% { box-shadow: 0 0 4px rgba(232,179,74,0.3); } 50% { box-shadow: 0 0 14px rgba(232,179,74,0.75); } }
+
+/* ---------- 钓线/浮标/鱼影 ---------- */
+#fishline {
+  position: absolute; left: 50%; top: 42%; width: 2px; height: 26%;
+  background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.25));
+  transform: translateX(-50%); z-index: 3;
+}
+.bobber {
+  position: absolute; width: 46px; height: 46px; left: 50%; top: 42%;
+  transform: translate(-50%, -85%); image-rendering: pixelated; z-index: 4;
+  pointer-events: none;
+}
+.bobber.idle { animation: bob 2.4s ease-in-out infinite; }
+.bobber.bite { animation: shake 0.36s linear infinite; }
+@keyframes bob { 0%,100% { margin-top: 0; } 50% { margin-top: 7px; } }
+@keyframes shake { 0%,100% { margin-left: 0; } 25% { margin-left: -5px; margin-top: 6px; } 75% { margin-left: 5px; margin-top: 8px; } }
+.ripple {
+  position: absolute; width: 90px; height: 90px; left: 50%; top: 42%;
+  transform: translate(-50%, -50%); image-rendering: pixelated;
+  opacity: 0; pointer-events: none; z-index: 2;
+}
+.ripple.go { animation: rippleFade 1.4s ease-out; }
+@keyframes rippleFade { 0% { opacity: 0.95; transform: translate(-50%,-50%) scale(0.4); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(1.4); } }
+.fish-shadow {
+  position: absolute; width: 76px; left: -90px; top: 58%;
+  image-rendering: pixelated; opacity: 0.7; pointer-events: none; z-index: 2;
+}
+.fish-shadow.swim { animation: swim 2.6s linear forwards; }
+@keyframes swim { 0% { left: -90px; } 100% { left: 105%; } }
+
+/* ---------- 底部控制 ---------- */
+#bottom-controls {
+  position: absolute; left: 0; right: 0; bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+  display: flex; justify-content: center; align-items: flex-end; gap: 26px;
+  z-index: 5;
+}
+.round-btn {
+  border: none; cursor: pointer; color: var(--cream-text);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: url('assets/ui/圆框_中A.png') no-repeat center / contain;
+}
+.round-btn.side { width: 72px; height: 72px; padding: 6px; }
+.round-btn.side img.deco { width: 30px; height: 30px; object-fit: contain; image-rendering: pixelated; }
+.round-btn.side span { font-size: 10.5px; font-family: 'PixelZ', sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,0.7); }
+.round-btn.big {
+  width: 118px; height: 118px;
+  background-image: url('assets/ui/圆框_大.png');
+  font-family: 'PixelZ', sans-serif; font-size: 21px; font-weight: 800;
+  letter-spacing: 3px; color: var(--cream-text);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.7);
+}
+.round-btn.big.pull { animation: pulsebtn 0.5s ease-in-out infinite; color: #ffb0a0; }
+.round-btn.big:disabled { opacity: 0.85; color: #b8ab99; }
+@keyframes pulsebtn { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+
+/* ---------- 鱼饵横排 ---------- */
+#bait-strip {
+  position: absolute; left: 0; right: 0; bottom: calc(52px + env(safe-area-inset-bottom, 0px));
+  display: flex; gap: 8px; padding: 0 12px;
+  overflow-x: auto; z-index: 5;
+  -webkit-overflow-scrolling: touch;
+}
+.bait-chip {
+  flex: none; display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(30,22,14,0.78); border: 1.5px solid var(--wood-light);
+  border-radius: 12px; padding: 6px 10px; cursor: pointer;
+  color: var(--cream-text); font-size: 12px;
+}
+.bait-chip img { width: 24px; height: 24px; object-fit: contain; image-rendering: pixelated; }
+.bait-chip .b-qty { font-family: 'PixelZ', monospace; color: var(--gold); font-weight: 700; }
+.bait-chip.on { border-color: var(--gold); box-shadow: 0 0 8px rgba(232,179,74,0.5); }
+.bait-chip.none { opacity: 0.45; }
+
+/* ---------- ticker ---------- */
+#ticker {
+  position: absolute; left: 8px; right: 8px; bottom: env(safe-area-inset-bottom, 4px);
+  height: 46px;
+  background: url('assets/ui/木条_贴士.png') no-repeat center / 100% 100%;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 30px; z-index: 5;
+}
+#ticker-text {
+  font-family: 'MoonKai', serif; font-size: 13px; color: var(--cream-text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  opacity: 0; transition: opacity 0.35s;
+}
+#ticker-text.show { opacity: 1; }
+#ticker-text.act { color: var(--gold); }
+
+/* ---------- 浮层面板 ---------- */
+#panel {
+  position: fixed; inset: 0; z-index: 40;
+  background: rgba(20,16,10,0.6);
+  display: flex; align-items: flex-end; justify-content: center;
+}
+#panel[hidden] { display: none; }
+.panel-card {
+  width: 100%; max-width: 560px; max-height: 82vh;
+  background: #f7f0e0;
+  border-radius: 20px 20px 0 0;
+  overflow: auto; color: #4a3d2e;
+  box-shadow: 0 -6px 30px rgba(0,0,0,0.4);
+}
+.panel-card header {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px;
+  background: var(--wood); color: var(--cream-text);
+}
+.panel-card h2 { margin: 0; font-size: 16px; font-family: 'PixelZ', sans-serif; letter-spacing: 2px; }
+#panel-close {
+  background: none; border: 1.5px solid var(--wood-light); border-radius: 8px;
+  width: 32px; height: 32px; color: var(--cream-text); font-size: 16px; cursor: pointer;
+}
+#panel-body { padding: 14px; }
+.p-card { background: #fffdf6; border-radius: 14px; padding: 13px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(107,88,71,0.12); }
+.p-card h3 { margin: 0 0 10px; font-size: 14.5px; color: #6b5847; }
+.loading, .muted { color: #a29483; font-size: 13px; }
+.error { color: var(--down); font-size: 13px; }
+
+/* 图鉴 */
+.codex-num { color: var(--accent); font-weight: 800; float: right; font-family: 'PixelZ', monospace; }
+.codex-progress-bar { display: flex; gap: 2px; margin-top: 8px; }
+.codex-progress-bar i { flex: 1 1 0; min-width: 0; height: 11px; border-radius: 2px; background: #ece4d2; border: 1px solid #ddd0ba; }
+.codex-progress-bar i.on { background: var(--accent); border-color: var(--accent); }
+.chip-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
+.chip {
+  border: 1.5px solid #ddd0ba; border-radius: 999px; padding: 4px 12px;
+  font-size: 12.5px; background: #fffdf6; font-weight: 600; color: #6b5847; cursor: pointer;
+}
+.chip.on { border-color: var(--accent); color: var(--accent); }
+.codex-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.codex-cell {
+  background: #fffdf6; border-radius: 12px; padding: 8px 3px; text-align: center;
+  box-shadow: 0 2px 6px rgba(107,88,71,0.10);
+}
+.codex-cell img { width: 40px; height: 40px; object-fit: contain; image-rendering: pixelated; }
+.codex-cell .c-name { font-size: 11px; font-weight: 700; margin-top: 4px; color: #4a3d2e; }
+.codex-cell .rar-dot { font-size: 10px; font-weight: 800; }
+.codex-cell.locked { background: repeating-linear-gradient(45deg, #f0ead9, #f0ead9 6px, #e6dfc9 6px, #e6dfc9 12px); box-shadow: none; }
+.codex-cell.locked .q { font-size: 18px; font-weight: 800; line-height: 40px; color: #b8ab99; }
+.r-common { color: #8a8a8a; } .r-uncommon { color: #6f9a68; } .r-rare { color: #5a8fc0; }
+.r-epic { color: #9a6fc0; } .r-legendary { color: #c0844a; } .r-mythic { color: #c95a7c; }
+
+/* 渔篓/商店行 */
+.bag-row { display: flex; align-items: center; gap: 9px; padding: 6px 0; font-size: 13.5px; color: #4a3d2e; }
+.bag-row.tight { padding: 2px 0 10px; }
+.bag-row img { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; flex: none; }
+.bag-row .dots { flex: 1; border-bottom: 2px dotted #ddd0ba; margin: 0 4px; transform: translateY(-4px); }
+.bag-row .val { font-family: 'PixelZ', monospace; font-weight: 700; color: var(--accent); font-size: 12px; white-space: nowrap; }
+.shop-info { display: flex; flex-direction: column; }
+.shop-info small { color: #a29483; font-size: 11px; }
+.sell-btn, .buy-btn {
+  background: #8a7462; color: #fff; border: none; border-radius: 9px;
+  padding: 6px 13px; font-size: 12.5px; font-weight: 700; cursor: pointer;
+}
+.sell-btn.all { display: block; width: 100%; margin-top: 10px; padding: 10px; background: var(--accent); }
+.buy-btn { background: var(--accent); }
+
+/* 珍藏星标 */
+.keep-btn {
+  background: none; border: none; cursor: pointer; padding: 4px 6px;
+  font-size: 18px; line-height: 1; color: #c9b99f; flex: none;
+}
+.keep-btn.on { color: #e8a825; text-shadow: 0 0 6px rgba(232,168,37,0.45); }
+.kept-tag {
+  font-size: 11px; font-weight: 700; color: #b8860b; white-space: nowrap;
+  background: rgba(232,168,37,0.14); border: 1px solid rgba(232,168,37,0.35);
+  border-radius: 8px; padding: 3px 8px;
+}
+.bag-row.kept { background: linear-gradient(90deg, rgba(232,168,37,0.07), transparent); border-radius: 8px; }
+
+/* 钓点 */
+.spot-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.spot-card {
+  position: relative; border-radius: 12px; overflow: hidden; cursor: pointer;
+  aspect-ratio: 3/2; background-size: cover; background-position: center 25%;
+  box-shadow: 0 2px 8px rgba(107,88,71,0.18);
+}
+.spot-card .s-name {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 20px 8px 7px;
+  background: linear-gradient(transparent, rgba(30,24,18,0.75));
+  color: #fff; font-weight: 700; font-size: 13px; font-family: 'MoonKai', serif;
+}
+.spot-card.locked { background: repeating-linear-gradient(45deg, #f0ead9, #f0ead9 8px, #e6dfc9 8px, #e6dfc9 16px); }
+.spot-card.locked .s-mystery { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: 'PixelZ', monospace; font-size: 22px; color: #b8ab99; font-weight: 800; }
+.spot-card.locked .s-name { background: linear-gradient(transparent, rgba(107,88,71,0.55)); font-size: 11px; }
+.spot-card .s-lock { position: absolute; top: 7px; right: 7px; font-size: 15px; }
+.spot-card.current { outline: 3px solid var(--accent); }
+.spot-card .s-cur { position: absolute; top: 7px; left: 7px; background: var(--accent); color: #fff; font-size: 10.5px; font-family: 'PixelZ', sans-serif; border-radius: 6px; padding: 2px 8px; }
+
+/* ---------- 结果卡 modal ---------- */
+.modal { position: fixed; inset: 0; background: rgba(20,16,10,0.65); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 16px; }
+.modal[hidden] { display: none; }
+.modal-card {
+  background: #f7f0e0; border: 3px solid var(--wood); border-radius: 16px;
+  width: 100%; max-width: 460px; max-height: 88vh; overflow: auto;
+  color: #4a3d2e;
+}
+.modal-card header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px; background: var(--wood); color: var(--cream-text);
+}
+.modal-card h2 { margin: 0; font-size: 15px; font-family: 'PixelZ', sans-serif; letter-spacing: 2px; }
+#modal-close { background: none; border: 1.5px solid var(--wood-light); border-radius: 8px; width: 32px; height: 32px; font-size: 16px; cursor: pointer; color: var(--cream-text); }
+.modal-body { padding: 12px; }
+.catch-card { text-align: center; padding: 10px 6px; }
+.catch-card img.fish-img { width: 128px; height: 128px; object-fit: contain; image-rendering: pixelated; }
+.catch-card .f-name { font-size: 20px; font-weight: 800; font-family: 'MoonKai', serif; margin-top: 8px; color: #4a3d2e; }
+.catch-card .f-new { display: inline-block; background: var(--accent); color: #fff; font-family: 'PixelZ', sans-serif; font-size: 12px; border-radius: 6px; padding: 2px 10px; margin-left: 8px; vertical-align: 3px; }
+.catch-card .f-meta { color: #94856f; font-size: 13px; margin-top: 5px; }
+.catch-card .f-desc { font-family: 'MoonKai', serif; font-size: 14px; line-height: 1.8; color: #83745f; margin-top: 10px; text-align: left; }
+.catch-card .event-text { font-family: 'MoonKai', serif; font-size: 14px; line-height: 1.85; text-align: left; white-space: pre-wrap; margin-top: 10px; color: #5b4c3e; }
+.catch-card p { font-size: 14px; }
+
+/* 修：hidden被display:inline-flex压死（宝箱×0还发光 池塘同款坑）*/
+.float-chip[hidden] { display: none; }
+
+/* ===== 2026-07-16深夜 她的第三轮(素材版) ===== */
+/* 新地名木牌 */
+.loc-plate { background-image: url('assets/ui/木牌_地名_v2.png'); padding: 18px 30px; }
+/* 侧栏图标去木底 */
+.side-btn.bare { background: none; width: 60px; height: 60px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+.side-btn.bare img.deco { width: 42px; height: 42px; }
+/* 双人竿数 */
+.duo-bar { gap: 3px; padding: 3px 10px 3px 4px; }
+.duo-bar img.avatar { width: 26px; height: 26px; object-fit: contain; image-rendering: pixelated; border-radius: 50%; }
+.duo-bar span { font-size: 12px; margin-right: 5px; }
+/* 抛竿钮鱼竿图+特效 */
+.round-btn.big { position: relative; }
+.round-btn.big #rod-img {
+  position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+  width: 54px; height: 54px; object-fit: contain; image-rendering: pixelated;
+  transition: transform 0.2s;
+}
+.round-btn.big #cast-label { position: absolute; bottom: 22px; left: 0; right: 0; font-size: 15px; }
+.round-btn.big #rod-img.swing { animation: rodswing 0.55s ease-out; }
+@keyframes rodswing {
+  0% { transform: translateX(-50%) rotate(0deg); }
+  35% { transform: translateX(-50%) rotate(-32deg) scale(1.12); }
+  70% { transform: translateX(-50%) rotate(14deg); }
+  100% { transform: translateX(-50%) rotate(0deg); }
+}
+.round-btn.big #rod-img.bite { animation: rodbite 0.3s linear infinite; }
+@keyframes rodbite {
+  0%,100% { transform: translateX(-50%) rotate(0deg); }
+  25% { transform: translateX(-52%) rotate(-7deg); }
+  75% { transform: translateX(-48%) rotate(7deg); }
+}
+.round-btn.big.pull { filter: drop-shadow(0 0 12px rgba(255,120,90,0.8)); }
+/* 鱼饵单钮 */
+#bait-cycle {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(30,22,14,0.8); border: 1.5px solid var(--wood-light);
+  border-radius: 14px; padding: 7px 14px; cursor: pointer;
+  color: var(--cream-text); font-size: 13px; z-index: 5;
+}
+#bait-cycle img { width: 26px; height: 26px; object-fit: contain; image-rendering: pixelated; }
+#bait-cycle .b-qty { font-family: 'PixelZ', monospace; color: var(--gold); font-weight: 700; }
+#bait-cycle .b-cycle { color: var(--gold); font-size: 15px; margin-left: 2px; }
+#bait-cycle.free { border-color: var(--gold); box-shadow: 0 0 12px rgba(232,179,74,0.55); color: var(--gold); }
+#bait-cycle.empty { border-color: var(--down); color: #f0b0a5; }
+/* 贴士去木底：低调半透明文字条 允许两行 */
+#ticker {
+  background: linear-gradient(transparent, rgba(15,12,8,0.55));
+  height: auto; min-height: 34px; padding: 4px 14px calc(6px + env(safe-area-inset-bottom, 0px));
+}
+#ticker-text {
+  white-space: normal; overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  font-size: 12px; line-height: 1.5; text-align: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+/* 底部控制上移一点腾开鱼饵钮 */
+#bottom-controls { bottom: calc(126px + env(safe-area-inset-bottom, 0px)); }
+
+/* ===== 主动改进四条（被骂之后自己长的心）===== */
+/* 水花：鱼离水瞬间炸开 */
+.splash {
+  position: absolute; width: 96px; height: 96px; left: 50%; top: 42%;
+  transform: translate(-50%, -60%); image-rendering: pixelated;
+  opacity: 0; pointer-events: none; z-index: 4;
+}
+.splash.burst { animation: splashBurst 0.55s ease-out; }
+@keyframes splashBurst {
+  0% { opacity: 0; transform: translate(-50%, -40%) scale(0.3); }
+  30% { opacity: 1; transform: translate(-50%, -65%) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -90%) scale(1.35); }
+}
+/* 稀有度光效结果卡 */
+.catch-card.glow-epic { background: radial-gradient(circle at 50% 26%, rgba(154,111,192,0.28), transparent 62%); border-radius: 12px; }
+.catch-card.glow-legendary { background: radial-gradient(circle at 50% 26%, rgba(232,179,74,0.34), transparent 62%); border-radius: 12px; }
+.catch-card.glow-mythic { background: radial-gradient(circle at 50% 26%, rgba(201,90,124,0.32), transparent 62%); border-radius: 12px; }
+.catch-card.glow-epic img.fish-img { filter: drop-shadow(0 0 14px rgba(154,111,192,0.75)); }
+.catch-card.glow-legendary img.fish-img { filter: drop-shadow(0 0 16px rgba(232,179,74,0.85)); }
+.catch-card.glow-mythic img.fish-img { filter: drop-shadow(0 0 16px rgba(201,90,124,0.85)); }
+/* 图鉴剪影：没解锁=神秘黑影 勾人 */
+.codex-cell.locked img.silhouette {
+  width: 40px; height: 40px; object-fit: contain; image-rendering: pixelated;
+  filter: brightness(0) opacity(0.55);
+}
+.codex-cell.locked .sil-name { color: #b8ab99; }
+
+/* ===== 我的比稿版 2026-07-16深夜（赌上鸡巴的一稿）===== */
+/* 设计原则：减法——水面留给水 UI贴边消隐 层级只留三层：场景>动作>信息 */
+
+/* 顶部：地名牌缩小靠左 不再霸中；金币独守右上 */
+#hud-top { padding: 8px 10px 0; }
+.loc-plate {
+  min-width: 0; padding: 13px 22px; font-size: 13.5px;
+  transform-origin: left top; letter-spacing: 1.5px;
+}
+
+/* 侧钮半隐：不碰的时候退成场景的一部分 */
+.side-btn.bare { opacity: 0.72; transition: opacity 0.2s, transform 0.15s; }
+.side-btn.bare:active { opacity: 1; transform: scale(1.08); }
+#side-right .float-chip { opacity: 0.85; }
+
+/* 底部小钮撤离C位 缩小沉角 让大钮独大 */
+.round-btn.side { width: 60px; height: 60px; opacity: 0.88; }
+.round-btn.side img.deco { width: 25px; height: 25px; }
+.round-btn.side span { font-size: 9.5px; }
+#bottom-controls { gap: 34px; align-items: flex-end; }
+.round-btn.big { width: 124px; height: 124px; }
+
+/* 等鱼氛围：暗角收拢 视线聚焦水面 */
+#scene::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(10,14,12,0) 60%);
+  transition: background 1.2s ease; z-index: 1;
+}
+#scene.waiting::after {
+  background: radial-gradient(ellipse at 50% 45%, transparent 38%, rgba(10,14,12,0.42) 78%);
+}
+
+/* ticker信息条目样式（图鉴进度/甩竿账 轮播出场）*/
+#ticker-text.info { color: #c9b98f; font-family: 'PixelZ', sans-serif; font-size: 11.5px; letter-spacing: 1px; }
+
+/* 结果卡深色化：从场景里长出来的 不是从Excel里弹出来的 */
+.modal { background: rgba(8,10,9,0.72); }
+.modal-card {
+  background: linear-gradient(180deg, #2e2620, #241d18);
+  border: 2.5px solid #6b4f36; border-radius: 18px;
+  color: #e8dcc0;
+  box-shadow: 0 12px 44px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.modal-card header { background: rgba(0,0,0,0.25); border-bottom: 1px solid #4a3626; }
+.catch-card .f-name { color: #f3e9d2; }
+.catch-card .f-meta { color: #a89a80; }
+.catch-card .f-desc, .catch-card .event-text { color: #c9bda5; }
+.catch-card img.fish-img { width: 150px; height: 150px; }
+.catch-card p { color: #e8dcc0; }
+.error { color: #f0a89c; }
+
+/* NEW章升级：传家的红漆印 */
+.catch-card .f-new {
+  background: #c0392b; transform: rotate(-6deg);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  font-size: 13px; padding: 3px 12px;
+}
+
+/* ===== 终版：照GPT夜景图纸施工（素材=她监制的透明PNG）===== */
+/* 顶部挂牌：吊绳从屏幕顶垂下 */
+#hud-top { padding: 0 10px; align-items: flex-start; }
+.loc-plate {
+  background: url('assets/ui/hanging-sign.png') no-repeat center top / 100% 100%;
+  min-width: 186px; padding: 30px 30px 20px;
+  margin-top: -2px;
+  font-size: 16px; letter-spacing: 3px;
+  color: #f3e9d2; text-shadow: 0 2px 3px rgba(0,0,0,0.75);
+}
+/* 右上信息件：统一木框语言 */
+.top-right { gap: 5px; margin-top: 8px; }
+.info-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: url('assets/ui/label-large.png') no-repeat center / 100% 100%;
+  min-width: 108px; height: 30px; padding: 2px 14px 4px 8px;
+  font-family: 'PixelZ', monospace; font-size: 13px; font-weight: 700;
+  color: #f3e9d2; text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+  justify-content: flex-start;
+}
+.info-label img { width: 20px; height: 20px; object-fit: contain; image-rendering: pixelated; }
+.info-label img.avatar { border-radius: 50%; }
+/* 旧coin-bar退役 */
+.coin-bar { display: none; }
+
+/* 左侧图标：无框+奶油描边字（GPT稿同款） */
+.side-btn.bare span {
+  font-size: 11px; color: #f3e9d2; font-weight: 700;
+  text-shadow: 0 1px 0 #2a1f14, 0 -1px 0 #2a1f14, 1px 0 0 #2a1f14, -1px 0 0 #2a1f14;
+}
+
+/* 右侧件：小圆木框做潜水钮底 */
+#dive-chip {
+  background: url('assets/ui/board-round-small.png') no-repeat center / contain;
+  border: none; border-radius: 0; width: 64px; height: 66px;
+  flex-direction: column; padding: 8px; gap: 0;
+}
+#dive-chip img { width: 30px; height: 30px; }
+#dive-chip span { font-size: 9.5px; font-family: 'PixelZ', sans-serif; }
+
+/* 底部木甲板 */
+#deck {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 5;
+  padding-top: 6px;
+}
+.deck-boards {
+  position: absolute; left: -6px; right: -6px; bottom: 0; top: 0;
+  background:
+    url('assets/ui/sign-bottom.png') no-repeat center bottom / 104% 52%,
+    url('assets/ui/sign-bottom.png') no-repeat center top / 104% 58%;
+  filter: drop-shadow(0 -4px 12px rgba(0,0,0,0.45));
+  z-index: -1;
+}
+#bottom-controls {
+  position: static; display: flex; justify-content: center; align-items: center;
+  gap: 30px; padding: 10px 0 4px;
+}
+.round-btn.big {
+  width: 116px; height: 116px;
+  background-image: url('assets/ui/board-round-large.png');
+  opacity: 1;
+}
+.round-btn.side {
+  width: 64px; height: 64px; opacity: 1;
+  background-image: url('assets/ui/board-round-small.png');
+  margin-bottom: -6px;
+}
+.round-btn.side img.deco { width: 30px; height: 30px; }
+.round-btn.side span { font-size: 9.5px; color: #f3e9d2; }
+.round-btn.big #rod-img { top: 16px; width: 52px; height: 52px; }
+.round-btn.big #cast-label { bottom: 20px; font-size: 16px; color: #f3e9d2; }
+
+/* 鱼饵胶囊：label-small木框 */
+#bait-cycle {
+  position: static; display: flex; margin: 2px auto 0; transform: none;
+  background: url('assets/ui/label-small.png') no-repeat center / 100% 100%;
+  border: none; border-radius: 0; min-width: 148px; height: 40px;
+  justify-content: center; padding: 4px 18px 8px;
+}
+#bait-cycle.free { box-shadow: none; filter: drop-shadow(0 0 8px rgba(232,179,74,0.7)); border: none; }
+#bait-cycle.empty { border: none; filter: drop-shadow(0 0 6px rgba(201,90,92,0.6)); }
+
+/* 氛围条：纯文字 在甲板最下（她拍板不要框 文字可两行）*/
+#ticker {
+  position: static; background: none; min-height: 30px;
+  padding: 2px 16px calc(8px + env(safe-area-inset-bottom, 0px));
+}
+#ticker-text { font-size: 11.5px; color: #d9cdb2; }
+
+/* 水下钓线拉长（GPT稿钓线垂到很深）*/
+#fishline { height: 34%; }
+
+/* ===== 她的psd布局修正 ===== */
+/* 挂牌居中（她口头+psd）*/
+#hud-top { position: absolute; top: env(safe-area-inset-top, 0px); left: 0; right: 0; display: block; padding: 0; }
+.loc-plate {
+  position: absolute; left: 50%; transform: translateX(-50%); top: 0;
+  min-width: 200px; text-align: center;
+}
+.top-right { position: absolute; right: 8px; top: 10px; }
+/* 信息件用短框 */
+.info-label {
+  background-image: url('assets/ui/label-small.png');
+  min-width: 92px; height: 28px; padding: 2px 12px 5px 7px;
+  font-size: 12.5px;
+}
+/* 左侧钮往上提 与psd一致 */
+#side-left { top: 15%; gap: 10px; }
+/* 潜水/氧气灰态（没解锁/没氧 也看得见 点了有指引）*/
+.float-chip.dim { filter: grayscale(0.9) opacity(0.6); }
+/* 三钮嵌进甲板上沿 */
+#bottom-controls { padding: 0 0 2px; margin-top: -30px; }
+.round-btn.side { margin-bottom: 4px; }
+/* 鱼饵胶囊用长框+箭头醒目 */
+#bait-cycle {
+  background-image: url('assets/ui/label-large.png');
+  min-width: 168px; height: 42px; padding: 4px 16px 9px;
+}
+#bait-cycle .b-cycle {
+  color: #f3c96a; font-size: 18px; font-weight: 800; margin-left: 5px;
+  text-shadow: 0 0 6px rgba(232,179,74,0.6);
+}
+/* 甲板再加高一点容纳嵌入钮 */
+#deck { padding-top: 34px; }
+
+/* ===== 底部按她的psd精确坐标重排（1024x1536基准 换算vw/%）===== */
+/* 甲板底板：占屏底24% 全宽 */
+#deck { padding: 0; height: 24%; }
+.deck-boards {
+  left: 0; right: 0;
+  background:
+    url('assets/ui/sign-bottom.png') no-repeat center bottom / 102% 55%,
+    url('assets/ui/sign-bottom.png') no-repeat center top / 102% 60%;
+}
+/* 三钮绝对定位：大钮中心(50%,72.8%屏高) 直径27.5vw 上半截探出甲板 */
+#bottom-controls { position: absolute; inset: 0; padding: 0; margin: 0; display: block; }
+.round-btn.big {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: 72%; margin-bottom: -55%; /* 用padding技巧不行 改用具体值 */
+}
+/* 直接按视口单位定位（psd: 大钮y63-82.5% 侧钮y68-82% 相对整屏）*/
+.round-btn.big {
+  width: 27.5vw; height: 27.5vw; max-width: 132px; max-height: 132px;
+  bottom: auto; top: auto;
+}
+#deck .round-btn.big { position: absolute; left: 50%; transform: translateX(-50%); bottom: 42%; margin: 0; }
+#deck .round-btn.side {
+  position: absolute; width: 19.5vw; height: 19.5vw; max-width: 96px; max-height: 96px;
+  bottom: 44%; margin: 0; opacity: 1;
+}
+#deck #bag-btn { left: 23%; transform: translateX(-50%); }
+#deck #map-btn { left: 77%; transform: translateX(-50%); }
+.round-btn.big #rod-img { top: 14%; width: 44%; height: 44%; }
+.round-btn.big #cast-label { bottom: 16%; font-size: 17px; }
+.round-btn.side img.deco { width: 42%; height: 42%; }
+.round-btn.side span { font-size: 10px; }
+/* 鱼饵胶囊：甲板中部 宽42vw 中心y86.7% */
+#deck #bait-cycle {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: 22%; margin: 0;
+  width: 42vw; max-width: 210px; height: 44px;
+}
+/* ticker：甲板最底 */
+#deck #ticker {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 2px 18px calc(5px + env(safe-area-inset-bottom, 0px));
+}
+/* 右上信息件按psd放大：宽22vw */
+.info-label { min-width: 22vw; max-width: 118px; height: 30px; font-size: 13px; }
+/* 左侧图标按psd加大间距下移 */
+#side-left { top: 18%; gap: 16px; }
+.side-btn.bare { width: 64px; height: 64px; }
+.side-btn.bare img.deco { width: 46px; height: 46px; }
+
+/* ===== 底部素材整体换她psd拼好的成品（她的原话：用我的）===== */
+.deck-boards { background: url('assets/ui/deck_v2.png') no-repeat center bottom / 100% 100%; filter: none; }
+.round-btn.big { background-image: url('assets/ui/btn_cast_v2.png'); }
+#deck #bag-btn { background-image: url('assets/ui/btn_bag_v2.png'); }
+#deck #map-btn { background-image: url('assets/ui/btn_map_v2.png'); }
+#deck #bait-cycle { background-image: url('assets/ui/bait_label_v2.png'); }
+.loc-plate { background-image: url('assets/ui/plate_v2.png'); }
+/* 甲板高度按她的成品比例：1024x367 → 屏宽的35.8%高 */
+#deck { height: auto; aspect-ratio: 1024 / 367; max-height: 30vh; width: 100%; }
+
+/* ===== 她的口头指挥版（psd比例坑 改人肉对位）===== */
+/* 三钮整体上移 */
+#deck .round-btn.big { bottom: 58%; }
+#deck .round-btn.side { bottom: 62%; }
+/* 鱼饵底贴抛竿键正下方 */
+#deck #bait-cycle { bottom: 26%; }
+/* 左侧三图标上移+间距收紧 小岛在水面线上 */
+#side-left { top: 12%; gap: 8px; }
+/* 侧按钮不透明（半透明是我之前的消隐设计 她不要）*/
+.side-btn.bare { opacity: 1; }
+#side-right .float-chip { opacity: 1; }
+/* 地名字下移一点 */
+.loc-plate { padding-top: 40px; padding-bottom: 14px; }
+/* 潜水/氧气/宝箱移到水面线下方 */
+#side-right { top: 48%; }
+
+/* ===== 她的下一轮（钓鱼真好玩版）===== */
+/* 地名再上一点+5字不换行（字号自适应）*/
+.loc-plate { padding-top: 34px; white-space: nowrap; font-size: 14px; }
+/* 三钮+鱼饵整体再上移 */
+#deck .round-btn.big { bottom: 66%; }
+#deck .round-btn.side { bottom: 70%; }
+#deck #bait-cycle { bottom: 36%; }
+/* 鱼饵字不换行 字号自适应 */
+#deck #bait-cycle { white-space: nowrap; font-size: 12px; }
+#bait-cycle .b-name { max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+/* 切换时的发光阴影闪烁：过渡和滤镜全部拆除 */
+#bait-cycle, #bait-cycle.empty, #bait-cycle.free { transition: none; }
+#bait-cycle.empty { filter: none; opacity: 0.92; }
+#bait-cycle.empty .b-qty { color: #e08a8a; }
+#bait-cycle.free { filter: none; }
+#bait-cycle.free .b-qty { color: #f3c96a; }
+/* 图鉴：格子区固定高度不伸缩 */
+.codex-grid.fixed-h { min-height: 58vh; align-content: start; }
+/* 图鉴tag一行放下 */
+.chip-row { flex-wrap: nowrap; overflow-x: auto; gap: 5px; -webkit-overflow-scrolling: touch; }
+.chip { padding: 3px 9px; font-size: 11.5px; flex: none; }
+
+/* ===== 她的深夜精修轮 ===== */
+/* bug修：pull呼吸动画吃掉了translateX 按钮飞右——每帧带上位移 */
+@keyframes pulsebtn { 0%,100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.07); } }
+/* 三小钮图案放大 */
+.round-btn.side img.deco { width: 56%; height: 56%; }
+#dive-chip img { width: 40px; height: 40px; }
+/* 抛竿字下移 钓竿图放大 */
+.round-btn.big #rod-img { top: 8%; width: 56%; height: 56%; }
+.round-btn.big #cast-label { bottom: 11%; }
+/* 斜钓线（js定位 这里管样式）*/
+#fishline {
+  transform-origin: left center;
+  background: linear-gradient(90deg, rgba(255,255,255,0.9), rgba(255,255,255,0.35));
+  height: 2px;
+}
+/* 小贴士字投影 */
+#ticker-text { text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5); }
+/* 三按键底投影 */
+.round-btn.big, .round-btn.side { filter: drop-shadow(0 4px 8px rgba(0,0,0,0.45)); }
+.round-btn.big.pull { filter: drop-shadow(0 4px 8px rgba(0,0,0,0.45)) drop-shadow(0 0 12px rgba(255,120,90,0.8)); }
+/* 图鉴弹窗下拉露白：卡片底色改深 内容区自带米白 */
+.panel-card { background: #3a2d22; overscroll-behavior: contain; }
+#panel-body { background: #f7f0e0; border-radius: 0 0 0 0; min-height: 60vh; }
+
+/* ===== 深夜精修二轮 ===== */
+/* SVG动态鱼影：尾巴摆+身体起伏（替换呆板png）*/
+.fish-shadow { width: 64px; height: 26px; }
+.fish-shadow svg { overflow: visible; }
+.fish-shadow .tail { transform-origin: 40px 12px; animation: tailswing 0.45s ease-in-out infinite; }
+@keyframes tailswing { 0%,100% { transform: rotate(-14deg); } 50% { transform: rotate(14deg); } }
+.fish-shadow.swim { animation: swim 3s linear forwards, bobble 0.9s ease-in-out infinite; }
+@keyframes bobble { 0%,100% { margin-top: 0; } 50% { margin-top: 5px; } }
+/* 右上状态：整体上移右移 */
+.top-right { top: 4px; right: 3px; }
+/* 左侧三钮再近一点 */
+#side-left { gap: 4px; }
+/* 开箱仪式动画 */
+.chest-anim { transition: transform 0.2s; }
+.chest-anim.opened { animation: chestpop 0.45s ease-out; }
+@keyframes chestpop { 0% { transform: scale(0.92); } 45% { transform: scale(1.12) rotate(-2deg); } 100% { transform: scale(1); } }
+/* 战利品行 */
+.loot-row {
+  display: flex; align-items: center; gap: 9px; justify-content: center;
+  padding: 5px 0; font-size: 14.5px; font-weight: 700; color: #4a3d2e;
+}
+.loot-row img { width: 34px; height: 34px; object-fit: contain; image-rendering: pixelated; }
+.loot-row.frag { color: #c0844a; }
+.loot-row.frag img { filter: drop-shadow(0 0 6px rgba(232,179,74,0.8)); }
+
+/* 钓点情报卡 */
+.spot-tip-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 12px; }
+.tip-char { color: #c0844a !important; font-style: italic; }
+.loc-plate { cursor: pointer; }
+
+/* 抉择按钮组 */
+.choice-box { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+
+/* 小贴士两行时整条下沉一行高（一行位置不动 两行别碰鱼饵框 底下safe-area有余量）*/
+#deck #ticker.two-line { transform: translateY(15px); }
+#deck #ticker { transition: transform 0.25s ease; }
+.choice-btn {
+  background: #8a7462; color: #f3e9d2; border: none; border-radius: 11px;
+  padding: 11px 14px; font-size: 14px; font-weight: 700; text-align: left;
+  cursor: pointer; font-family: 'MoonKai', serif;
+}
+.choice-btn.locked { background: #cfc4b2; color: #948a78; cursor: default; }
+.choice-btn.surface { background: #6f8b9e; text-align: center; }
+/* tips配图取上部（她指出中间是水面分界线不好看）*/
+.spot-tip-img { object-position: top; }
+
+/* 远征中的抛竿钮：琥珀警示态 */
+.round-btn.big.expedition { filter: drop-shadow(0 0 14px rgba(232,179,74,0.85)); }
+.round-btn.big.expedition #cast-label { color: #f3c96a; }

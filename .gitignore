@@ -1,0 +1,6 @@
+# 每家自己的进度和账本 不进仓库
+fishing_save.json
+fishing_credits.json
+fishing_activity.json
+fishing_keepsakes.json
+__pycache__/
