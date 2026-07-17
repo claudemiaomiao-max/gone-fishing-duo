@@ -749,3 +749,20 @@ body {
 /* 远征中的抛竿钮：琥珀警示态 */
 .round-btn.big.expedition { filter: drop-shadow(0 0 14px rgba(232,179,74,0.85)); }
 .round-btn.big.expedition #cast-label { color: #f3c96a; }
+
+/* 小贴士两行时整条下沉一行高（不碰鱼饵框） */
+#deck #ticker.two-line { transform: translateY(15px); }
+#deck #ticker { transition: transform 0.25s ease; }
+
+/* 情报卡·本地独家鱼种 */
+.ex-title { margin-top: 10px; font-size: 14px; }
+.ex-row { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-top: 6px; }
+.ex-chip {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #4a3d2e;
+  background: rgba(232,179,74,0.12); border: 1px solid rgba(180,150,100,0.35);
+  border-radius: 9px; padding: 4px 9px;
+}
+.ex-chip img { width: 26px; height: 26px; object-fit: contain; image-rendering: pixelated; }
+.ex-chip.off { opacity: 0.55; }
+.ex-chip.got { border-color: rgba(120,160,110,0.6); background: rgba(140,180,120,0.14); }
+.ex-chip:not(.got) img { filter: brightness(0); opacity: 0.5; }

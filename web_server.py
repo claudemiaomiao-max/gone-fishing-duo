@@ -166,6 +166,18 @@ def project_state():
         dive_n = engine._undiscovered_dive(S["location_id"], S["season_id"]) if engine._dive_unlocked(S["location_id"]) else -1
     except Exception:
         dive_n = -1
+    # 本地独家鱼种（火系两点共享一批鱼 认地方要认独家）
+    exclusive = []
+    try:
+        here = S["location_id"]
+        for f in engine.FISH.values():
+            flocs = f.get("locations", [])
+            if here in flocs and len([x for x in flocs if x in engine.LOCATIONS]) == 1 and not f.get("dive_only"):
+                exclusive.append({"name": f["name"], "rarity": f.get("rarity", ""),
+                                  "in_season": ("all" in f.get("seasons", []) or S["season_id"] in f.get("seasons", [])),
+                                  "caught": f["id"] in S["encyclopedia"]})
+    except Exception:
+        exclusive = []
     return {
         "points": S["points"],
         "turn": S["turn"],
@@ -173,7 +185,7 @@ def project_state():
         "location": {"id": S["location_id"], "name": loc["name"],
                      "desc": loc.get("description", ""), "character": loc.get("character", ""),
                      "season_ok": season_ok, "undiscovered": normal, "undiscovered_legend": legend,
-                     "dive_undiscovered": dive_n},
+                     "dive_undiscovered": dive_n, "exclusive_fish": exclusive},
         "locations": locations,
         "baits": baits,
         "hold": len(S["catch_inventory"]),
