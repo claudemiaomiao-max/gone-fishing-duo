@@ -202,18 +202,6 @@ function showSpotTips(state) {
   else if (loc.dive_undiscovered === 0) intel.push("🤿 水下的鱼这季已集齐。");
   else if (state.map_fragments && (state.map_fragments[loc.id] || 0) > 0) intel.push("🧩 藏宝图碎片 " + state.map_fragments[loc.id] + " 片，凑齐开潜水。");
   card.append(h("div", "f-meta", intel.join(" ")));
-  // 本地独家鱼种（火系钓点共享一批鱼 认地方认独家）
-  if ((loc.exclusive_fish || []).length) {
-    card.append(h("div", "f-name ex-title", "只在这里出的鱼"));
-    var exRow = h("div", "ex-row");
-    loc.exclusive_fish.forEach(function (f) {
-      var chip = h("span", "ex-chip" + (f.in_season ? "" : " off") + (f.caught ? " got" : ""));
-      chip.append(img(assetUrl("fish/" + f.name + ".png")));
-      chip.append(h("span", "", (f.caught ? f.name : "???") + (f.in_season ? "" : "（非当季）")));
-      exRow.append(chip);
-    });
-    card.append(exRow);
-  }
   body.append(card);
 }
 
