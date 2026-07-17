@@ -739,7 +739,10 @@ $("dive-chip").addEventListener("click", doDive);
 document.querySelectorAll(".side-btn[data-panel]").forEach(function (n) {
   n.addEventListener("click", function () { openPanel(n.dataset.panel); });
 });
-$("exit-island").addEventListener("click", function () { location.href = "/island.html#fun"; });
+if (CONFIG.exitUrl) {
+  $("exit-island").hidden = false;
+  $("exit-island").addEventListener("click", function () { location.href = CONFIG.exitUrl; });
+}
 
 refresh();
 setInterval(function () { if (!casting && panel.hidden && modal.hidden) refresh(); }, 45000);

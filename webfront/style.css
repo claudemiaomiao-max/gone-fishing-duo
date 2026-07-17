@@ -312,6 +312,8 @@ body {
 .loc-plate { background-image: url('assets/ui/木牌_地名_v2.png'); padding: 18px 30px; }
 /* 侧栏图标去木底 */
 .side-btn.bare { background: none; width: 60px; height: 60px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+.side-btn[hidden] { display: none; }
+.side-btn.bare svg.deco { width: 56%; height: 56%; }
 .side-btn.bare img.deco { width: 42px; height: 42px; }
 /* 双人竿数 */
 .duo-bar { gap: 3px; padding: 3px 10px 3px 4px; }
