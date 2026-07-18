@@ -21,7 +21,7 @@ function h(tag, cls, text) {
   return n;
 }
 function clear(n) { n.replaceChildren(); return n; }
-var ASSET_VER = "3";   // 素材更新时递增 破浏览器缓存
+var ASSET_VER = "4";   // 素材更新时递增 破浏览器缓存
 function assetUrl(p) { return BASE + "/assets/" + p + "?v=" + ASSET_VER; }
 function img(src, cls) {
   var i = h("img", cls || "");
