@@ -24,11 +24,10 @@ SAVE_PATH = ROOT / "fishing_save.json"
 _save_mtime_ns = None
 
 
-def record_external_casts(previous, current):
-    """Attribute direct engine.cmd() casts to Chenchen without changing his CLI."""
-    before_casts = previous.get("stats", {}).get("total_casts", 0) if previous else 0
-    after_casts = current.get("stats", {}).get("total_casts", 0)
-    added = after_casts - before_casts
+def record_external_turns(previous, current):
+    """Attribute direct engine.cmd() turns to Chenchen without changing his CLI."""
+    before_turn = previous.get("turn", 0) if previous else 0
+    added = current.get("turn", 0) - before_turn
     if added <= 0:
         return
     credits = load_credits()
@@ -53,7 +52,7 @@ def sync_engine_state():
         # A direct engine writer may be between open() and json.dump().
         return
     if isinstance(state, dict):
-        record_external_casts(engine.S, state)
+        record_external_turns(engine.S, state)
         engine.S = state
         _save_mtime_ns = mtime_ns
 
