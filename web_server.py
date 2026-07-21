@@ -20,6 +20,37 @@ ASSETS = ROOT / "webassets"
 CREDITS_PATH = ROOT / "fishing_credits.json"
 ACTIVITY_PATH = ROOT / "fishing_activity.json"
 KEEPSAKES_PATH = ROOT / "fishing_keepsakes.json"
+SAVE_PATH = ROOT / "fishing_save.json"
+_save_mtime_ns = None
+
+
+def sync_engine_state():
+    """Reload a valid save when an external player has changed it."""
+    global _save_mtime_ns
+    try:
+        mtime_ns = SAVE_PATH.stat().st_mtime_ns
+    except OSError:
+        return
+    if mtime_ns == _save_mtime_ns:
+        return
+    try:
+        with SAVE_PATH.open(encoding="utf-8") as f:
+            state = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        # A direct engine writer may be between open() and json.dump().
+        return
+    if isinstance(state, dict):
+        engine.S = state
+        _save_mtime_ns = mtime_ns
+
+
+def mark_engine_state_synced():
+    """Record the save timestamp after this web process writes it."""
+    global _save_mtime_ns
+    try:
+        _save_mtime_ns = SAVE_PATH.stat().st_mtime_ns
+    except OSError:
+        _save_mtime_ns = None
 
 
 def load_keepsakes():
@@ -303,6 +334,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             self._strip()
             p = urllib.parse.urlsplit(self.path)
+            sync_engine_state()
             if p.path == "/api/health":
                 return self._json(200, {"ok": True, "service": "fishing-standalone"})
             if p.path == "/api/state":
@@ -328,6 +360,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             self._strip()
             p = urllib.parse.urlsplit(self.path)
+            sync_engine_state()
             length = int(self.headers.get("Content-Length") or 0)
             body = json.loads(self.rfile.read(length) or b"{}")
             if p.path == "/api/cmd":
@@ -355,6 +388,7 @@ class Handler(BaseHTTPRequestHandler):
                     if stashed:
                         engine.S["catch_inventory"].extend(stashed)
                         engine._save()
+                mark_engine_state_synced()
                 if stashed:
                     text += "\n🔒 珍藏的 %d 条鱼安然待在篓底，没动。" % len(stashed)
                 try:
